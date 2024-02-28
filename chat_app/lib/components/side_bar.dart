@@ -1,3 +1,4 @@
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/profile_page.dart';
 import 'package:chat_app/pages/setting_page.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
@@ -64,6 +65,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -74,7 +76,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
             ),
             child: Text(
               //show logged in user's email
-              'Logged in as: ${FirebaseAuth.instance.currentUser!.email}',
+              '${lanNotifier.translate('logged')}: ${FirebaseAuth.instance.currentUser!.email}',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
                 fontSize: 24,
@@ -83,7 +85,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
           ),
           ListTile(
             leading: const Icon(Icons.contact_page),
-            title: const Text('Contacts'),
+            title: Text(lanNotifier.translate('contacts')),
             onTap: () {
               //navigate to the contacts page
               Navigator.pop(context);
@@ -91,7 +93,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
           ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
+            title: Text(lanNotifier.translate('profile')),
             onTap: () {
               //navigate to the profile page
               Navigator.pop(context);
@@ -106,7 +108,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
           ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
+            title: Text(lanNotifier.translate('settings')),
             onTap: () {
               //navigate to the settings page
               Navigator.pop(context);
@@ -114,7 +116,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SettingsPage()
+                  builder: (context) => SettingsPage()
                 )
               );
             },
@@ -122,7 +124,7 @@ class _MenuSideBarState extends State<MenuSideBar> {
           const SizedBox(height: 100),
           ListTile(
             leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
+            title: Text(lanNotifier.translate('logout')),
             onTap: () {
               signOut(context);
             },

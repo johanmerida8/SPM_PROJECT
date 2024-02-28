@@ -2,10 +2,12 @@
 
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
@@ -66,6 +68,7 @@ class _ResetPasswordState extends State<ResetPassword> {
 
   @override
   Widget build(BuildContext context) {
+        final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: SafeArea(
@@ -82,8 +85,8 @@ class _ResetPasswordState extends State<ResetPassword> {
 
                     const SizedBox(height: 25),
 
-                    const Text(
-                      'Reset password',
+                    Text(
+                      lanNotifier.translate('resetPassword'),
                       style: TextStyle(
                         fontSize: 16,
                       ),
@@ -95,7 +98,7 @@ class _ResetPasswordState extends State<ResetPassword> {
 
                     MyTextField(
                       controller: emailController,
-                      hintText: 'Email',
+                      hintText: lanNotifier.translate('email'),
                       obscureText: false,
                       isEnabled: true,
                     ),
@@ -105,7 +108,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                     //reset password button
 
                     MyButton(onTap: passwordReset, 
-                      text: 'Send'
+                      text: lanNotifier.translate('send')
                     ),
 
                     const SizedBox(height: 15),
@@ -117,7 +120,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         Navigator.pop(context);
                       },
                       child: Text(
-                      'Back to login',
+                      lanNotifier.translate('backToLogin'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         )

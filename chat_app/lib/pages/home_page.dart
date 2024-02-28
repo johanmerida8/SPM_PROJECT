@@ -2,6 +2,7 @@
 
 
 import 'package:chat_app/components/side_bar.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/chat_page.dart';
 import 'package:chat_app/pages/complete_profile.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
@@ -203,6 +204,7 @@ class _HomePageState extends State<HomePage>{
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -214,7 +216,7 @@ class _HomePageState extends State<HomePage>{
                   //opacity is 0 when the search bar is opened and 1 when it is closed
                   opacity: _isSearchOpened ? 0 : 1, 
                   duration: const Duration(milliseconds: 300),
-                  child: const Text('Contacts'),
+                  child: Text(lanNotifier.translate('contacts')),
                 ),
                 Spacer(),
                 IconButton(
@@ -236,8 +238,8 @@ class _HomePageState extends State<HomePage>{
 
                 child: TextField(
                   controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Search for a contact...',
+                  decoration: InputDecoration(
+                    hintText: lanNotifier.translate('search'),
                     hintStyle: TextStyle(
                       fontWeight: FontWeight.w300,
                       fontSize: 14,

@@ -1,10 +1,12 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/services/auth/login_or_register.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
 class DeleteProfile extends StatefulWidget {
   const DeleteProfile({super.key});
@@ -69,9 +71,10 @@ class _DeleteProfileState extends State<DeleteProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delete Profile'),
+        title: Text(lanNotifier.translate('deleteProfile')),
       ),
       body: SafeArea(
         child: Center(
@@ -97,7 +100,7 @@ class _DeleteProfileState extends State<DeleteProfile> {
                 
                 MyTextField(
                   controller: emailController, 
-                  hintText: 'Email', 
+                  hintText: lanNotifier.translate('email'), 
                   obscureText: false, 
                   isEnabled: true,
                 ),
@@ -106,7 +109,7 @@ class _DeleteProfileState extends State<DeleteProfile> {
 
                 MyButton(
                   onTap: deleteProfile,
-                  text: 'Delete Profile',
+                  text: lanNotifier.translate('deleteProfile'),
                 ),
               ],
             ),

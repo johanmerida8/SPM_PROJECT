@@ -1,6 +1,7 @@
 import 'package:chat_app/components/chat_bubble.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/components/typing_indicator.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/profile_details_page.dart';
 import 'package:chat_app/services/auth/chat_services/chat_service.dart';
 import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
@@ -129,6 +130,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -236,8 +238,8 @@ class _ChatPageState extends State<ChatPage> {
         : Alignment.centerLeft;
 
     var bubbleColor = (data['senderId'] == _auth.currentUser!.uid)
-        ? (isDarkMode ? Colors.green.shade600 : Colors.grey.shade500)
-        : (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200);
+        ? (isDarkMode ? Colors.green.shade600 : Colors.grey.shade600)
+        : (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade300);
 
     return GestureDetector(
       onLongPress: () {
@@ -246,15 +248,16 @@ class _ChatPageState extends State<ChatPage> {
           showDialog(
             context: context, 
             builder: (BuildContext context) {
+              final lanNotifier = Provider.of<LanguageNotifier>(context);
               return AlertDialog(
-                title: const Text('Delete Message'),
+                title: Text(lanNotifier.translate('deleteMsg')),
                 content: Text(data['message']),
                 actions: [
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     }, 
-                    child: const Text('Cancel')
+                    child: Text(lanNotifier.translate('cancel'))
                   ),
                   TextButton(
                     onPressed: () {
@@ -273,7 +276,7 @@ class _ChatPageState extends State<ChatPage> {
                         )
                       );
                     }, 
-                    child: const Text('Delete')
+                    child: Text(lanNotifier.translate('delete'))
                   ),
                   TextButton(
                     onPressed: () {
@@ -285,11 +288,11 @@ class _ChatPageState extends State<ChatPage> {
                         context: context, 
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text('Edit Message'),
+                            title: Text(lanNotifier.translate('editMsg')),
                             content: TextField(
                               controller: _msgEditController,
-                              decoration: const InputDecoration(
-                                hintText: 'Enter new message',
+                              decoration: InputDecoration(
+                                hintText: lanNotifier.translate('newMsg'),
                               ),
                             ),
                             actions: [
@@ -310,14 +313,14 @@ class _ChatPageState extends State<ChatPage> {
                                     ),
                                   );
                                 }, 
-                                child: const Text('Update')
+                                child: Text(lanNotifier.translate('update'))
                               ),
                             ],
                           );
                         }
                       );
                     }, 
-                    child: const Text('Edit'),
+                    child: Text(lanNotifier.translate('edit')),
                   )
                 ],
               );
@@ -361,6 +364,7 @@ class _ChatPageState extends State<ChatPage> {
   //build message input
   Widget _buildMessageInput() {
     // String otherUserEmail = widget.receiverUserEmail;
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     String otherUserID = widget.receiverUserID;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -385,7 +389,7 @@ class _ChatPageState extends State<ChatPage> {
               String email = data['email'] ?? '';
               return isTyping ? Column(
                 children: [
-                  Text('$email is typing...'),
+                  Text('$email ${lanNotifier.translate('typing')}'),
                   const SizedBox(height: 15),
                   TypingIndicator(isTyping: isTyping),
                 ],
@@ -403,7 +407,7 @@ class _ChatPageState extends State<ChatPage> {
               Expanded(
                   child: MyTextField(
                   controller: _msgController,
-                  hintText: 'Type a message',
+                  hintText: lanNotifier.translate('message'),
                   obscureText: false,
                   isEnabled: true,
                   focusNode: _focusNode,

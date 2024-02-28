@@ -1,7 +1,9 @@
 // ignore_for_file: unnecessary_null_comparison
 
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ProfileDetails extends StatefulWidget {
   final String receiverUserEmail;
@@ -24,10 +26,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('Profile Details'),
+        title: Text(lanNotifier.translate('profileDetails')),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -124,21 +127,21 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                           children: [
                             const SizedBox(height: 25),
                             Text(
-                              'Name: ${data['name']}',
+                              '${lanNotifier.translate('name')}: ${data['name']}',
                               style: const TextStyle(
                                 fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 15),
                             Text(
-                              'Bio: ${data['bio'] ?? 'No bio'}',
+                              '${lanNotifier.translate('bio')}: ${data['bio'] ?? 'No bio'}',
                               style: const TextStyle(
                                 fontSize: 16,
                               ),
                             ),
                             const SizedBox(height: 15),
                             Text(
-                              'Email: ${data['email']}',
+                              '${lanNotifier.translate('email')}: ${data['email']}',
                               style: const TextStyle(
                                 fontSize: 16,
                               ),

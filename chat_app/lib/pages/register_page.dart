@@ -2,6 +2,7 @@
 
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/home_page.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -40,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   // sign up user
   void signUp() async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     if (passwordController.text != confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -53,12 +55,12 @@ class _RegisterPageState extends State<RegisterPage> {
     final authService = Provider.of<AuthService>(context, listen: false);
 
     // Show a SnackBar with a circular progress indicator while signing up
-    const snackBar = SnackBar(
+     final snackBar = SnackBar(
       content: Row(
         children: [
           CircularProgressIndicator(),
           SizedBox(width: 20),
-          Text('Signing up...'),
+          Text(lanNotifier.translate('signingup')),
         ],
       ),
       duration: Duration(seconds: 5),
@@ -130,6 +132,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
@@ -159,7 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //name textfield
                   MyTextField(
                       controller: nameController,
-                      hintText: 'Name',
+                      hintText: lanNotifier.translate('name'),
                       obscureText: false,
                       isEnabled: true,
                   ),
@@ -169,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //email textfield
                   MyTextField(
                       controller: emailController,
-                      hintText: 'Email',
+                      hintText: lanNotifier.translate('email'),
                       obscureText: false,
                       isEnabled: true,
                   ),
@@ -178,7 +181,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //password textfield
                   MyTextField(
                       controller: passwordController,
-                      hintText: 'Password',
+                      hintText: lanNotifier.translate('password'),
                       obscureText: true,
                       isEnabled: true,
                   ),
@@ -187,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   //confirm password textfield
                   MyTextField(
                       controller: confirmController,
-                      hintText: 'Confirm password',
+                      hintText: lanNotifier.translate('confirmPassword'),
                       obscureText: true,
                       isEnabled: true,
                   ),
@@ -195,7 +198,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 25),
 
                   //sign in button
-                  MyButton(onTap: signUp, text: 'Sign Up'),
+                  MyButton(
+                    onTap: signUp, 
+                    text: lanNotifier.translate('signup')
+                  ),
 
                   const SizedBox(height: 50),
 
@@ -204,12 +210,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already a member?'),
+                      Text(lanNotifier.translate('notMember')),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: widget.onTap,
-                        child: const Text(
-                          'Login now',
+                        child: Text(
+                          lanNotifier.translate('login'),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

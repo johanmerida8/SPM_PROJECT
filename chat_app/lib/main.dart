@@ -3,6 +3,7 @@
 // import 'dart:html';
 
 import 'package:chat_app/firebase_options.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 // import 'package:chat_app/pages/notification_page.dart';
 // import 'package:chat_app/pages/notification_provider.dart';
 // import 'package:chat_app/pages/notification_page.dart';
@@ -20,9 +21,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_locales/flutter_locales.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 //this will help navigate to other screens easily
 // final navigatorKey = GlobalKey<NavigatorState>();
@@ -38,6 +43,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  //initialize the shared preference
+  await Locales.init(['en', 'es']);
   LocalNotificationService.initialize();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -45,11 +52,17 @@ void main() async{
   //lock the orientation to portrait
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
+  //get the preferred language
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  //get the selected language from shared preference or default to 'en'
+  String preferredLang = prefs.getString('language') ?? 'en';
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageNotifier(preferredLang)),
       ],
       child: const MyApp(),
     ),
@@ -111,14 +124,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  // @override
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: themeProvider.themeData,
-      home: const SplashScreen(),
+Widget build(BuildContext context) {
+  final themeProvider = Provider.of<ThemeProvider>(context);
+  final localeNotifier = Provider.of<LanguageNotifier>(context);
+  return LocaleBuilder(
+    builder: (locale) => MaterialApp(
+        localizationsDelegates: Locales.delegates,
+        supportedLocales: Locales.supportedLocales,
+        locale: Locale(localeNotifier.currentLocale ?? 'en'),
+        debugShowCheckedModeBanner: false,
+        theme: themeProvider.themeData,
+        home: const SplashScreen(),
+      )
     );
   }
 }

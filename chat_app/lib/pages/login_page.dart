@@ -3,6 +3,7 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/components/square_tile.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/home_page.dart';
 import 'package:chat_app/pages/reset_password.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
@@ -38,16 +39,17 @@ class _LoginPageState extends State<LoginPage> {
 
   // sign in user
   void signIn() async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     //get the auth service
     final authService = Provider.of<AuthService>(context, listen: false);
 
     //Show a SnackBar with a circular progress indicator while signing in
-      const snackBar = SnackBar(
+      final snackBar = SnackBar(
         content: Row(
           children: [
             CircularProgressIndicator(),
             SizedBox(width: 20),
-            Text('Signing in...'),
+            Text(lanNotifier.translate('signing')),
           ],
         ),
         duration: Duration(seconds: 3),
@@ -113,6 +115,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
@@ -141,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                   //email textfield
                   MyTextField(
                       controller: emailController,
-                      hintText: 'Email',
+                      hintText: lanNotifier.translate('email'),
                       obscureText: false,
                       isEnabled: true
                   ),
@@ -150,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                   //password textfield
                   MyTextField(
                       controller: passwordController,
-                      hintText: 'Password',
+                      hintText: lanNotifier.translate('password'),
                       obscureText: true,
                       isEnabled: true
                   ),
@@ -172,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                           child: Text(
-                            'Forgot password?',
+                            lanNotifier.translate('forgotPassword'),
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
@@ -188,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                   //sign in button
                   MyButton(
                     onTap: signIn, 
-                    text: 'Sign In'
+                    text: lanNotifier.translate('signin')
                   ),
         
                   const SizedBox(height: 50),
@@ -205,10 +208,10 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.grey,
                           ),
                         ),
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.0),
                           child: Text(
-                            'Or continue with',
+                            lanNotifier.translate('continueWith'),
                             style: TextStyle(
                               color: Colors.grey,
                             ),
@@ -246,12 +249,12 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Not a member?'),
+                      Text(lanNotifier.translate('notMember')),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: widget.onTap,
-                        child: const Text(
-                          'Register now',
+                        child: Text(
+                          lanNotifier.translate('signup'),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

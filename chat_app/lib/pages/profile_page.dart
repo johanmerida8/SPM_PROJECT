@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/resources/image_data.dart';
 import 'package:chat_app/resources/network_helper.dart';
 import 'package:chat_app/utils/utils.dart';
@@ -12,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final User? user;
@@ -266,10 +268,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(lanNotifier.translate('profile')),
       ),
       //safe area is used to avoid the notch and the camera hole
       body: SafeArea(
@@ -388,7 +391,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             //name textfield
                             MyTextField(
                               controller: nameController,
-                              hintText: 'Name',
+                              hintText: lanNotifier.translate('name'),
                               obscureText: false,
                               isEnabled: true,
                             ),
@@ -399,7 +402,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             //bio textfield
                             MyTextField(
                               controller: bioController,
-                              hintText: 'Bio',
+                              hintText: lanNotifier.translate('bio'),
                               obscureText: false,
                               isEnabled: true,
                             ),
@@ -410,7 +413,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             //email textfield
                             MyTextField(
                               controller: emailController,
-                              hintText: 'Email',
+                              hintText: lanNotifier.translate('email'),
                               obscureText: false,
                               isEnabled: false,
                             ),
@@ -443,7 +446,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   Navigator.pop(context);
                                 }
                               },
-                              text: 'Save',
+                              text: lanNotifier.translate('save'),
                             ),
                           ],
                         );
