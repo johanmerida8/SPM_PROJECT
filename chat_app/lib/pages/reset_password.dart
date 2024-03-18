@@ -26,6 +26,7 @@ class _ResetPasswordState extends State<ResetPassword> {
   }
 
   Future passwordReset() async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     try {
       //first check if the email is valid
       //attempt to send a password reset email to the user
@@ -38,14 +39,14 @@ class _ResetPasswordState extends State<ResetPassword> {
       if (querySnapshot.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Password reset email sent!'),
+            content: Text(lanNotifier.translate('sentResetPassword')),
           ),
         );
       } else {
         //if the email does not exist, show an error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('There is no user with this email.'),
+            content: Text(lanNotifier.translate('enteredEmail')),
           ),
         );
       }
@@ -53,13 +54,13 @@ class _ResetPasswordState extends State<ResetPassword> {
       if (e.code == 'invalid-email') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('The email address is not valid.'),
+            content: Text(lanNotifier.translate('invalidEmail')),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Something went wrong. Please try again later.'),
+            content: Text(lanNotifier.translate('error2')),
           ),
         );
       }
@@ -68,7 +69,7 @@ class _ResetPasswordState extends State<ResetPassword> {
 
   @override
   Widget build(BuildContext context) {
-        final lanNotifier = Provider.of<LanguageNotifier>(context);
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: SafeArea(

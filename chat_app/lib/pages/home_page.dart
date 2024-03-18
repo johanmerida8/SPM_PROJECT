@@ -277,6 +277,7 @@ class _HomePageState extends State<HomePage>{
   
 
   Widget buildBody() {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     return Column(
       children: [
         StreamBuilder(
@@ -288,11 +289,11 @@ class _HomePageState extends State<HomePage>{
             .snapshots(), 
             builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) {
-              return const Text('Something went wrong');
+              return Text(lanNotifier.translate('error'));
             }
 
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Loading...');
+              return Text(lanNotifier.translate('loading'));
             }
 
             final docs = searchResults.isNotEmpty ? searchResults : snapshot.data!.docs;
@@ -300,7 +301,7 @@ class _HomePageState extends State<HomePage>{
             if (noResFound) {
               return Expanded(
                 child: Center(
-                  child: Text('No results found for ${_searchNotifier.value}'),
+                  child: Text(lanNotifier.translate('noResFound')),
                 ),
               );
             } else {
@@ -350,8 +351,8 @@ class _HomePageState extends State<HomePage>{
                             });
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Something went wrong'),
+                              SnackBar(
+                                content: Text(lanNotifier.translate('error')),
                               ),
                             );
                           }
@@ -361,21 +362,21 @@ class _HomePageState extends State<HomePage>{
                             context: context, 
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: const Text('Delete contact'),
-                                content: const Text('Are you sure you want to delete this contact?'),
+                                title: Text(lanNotifier.translate('deleteContact')),
+                                content: Text(lanNotifier.translate('confirmDeleteContact')),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
                                     }, 
-                                    child: const Text('Cancel')
+                                    child: Text(lanNotifier.translate('cancel'))
                                   ),
                                   TextButton(
                                     onPressed: () {
                                       deleteContact(document.id);
                                       Navigator.pop(context);
                                     }, 
-                                    child: const Text('Delete')
+                                    child: Text(lanNotifier.translate('delete'))
                                   ),
                                 ],
                               );
@@ -396,6 +397,7 @@ class _HomePageState extends State<HomePage>{
 
   //contact request list
   Widget _buildContactRequestList() {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
         .collection('users')
@@ -404,11 +406,11 @@ class _HomePageState extends State<HomePage>{
         .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text('Error'); 
+          return Text(lanNotifier.translate('error')); 
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading...');
+          return Text(lanNotifier.translate('loading'));
         }
 
         return ListView(
@@ -440,23 +442,24 @@ class _HomePageState extends State<HomePage>{
   }
 
   Widget _buildAddUserBar() {
+  final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
   return FloatingActionButton(
     onPressed: () {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Enter email'),
+            title: Text(lanNotifier.translate('enterEmail')),
             content: TextField(
               controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
+              decoration: InputDecoration(
+                labelText: lanNotifier.translate('email'),
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text(
-                  'OK',
+                child: Text(
+                  lanNotifier.translate('send'),
                   style: TextStyle(
                     color: Colors.green,
                   ),
@@ -476,7 +479,9 @@ class _HomePageState extends State<HomePage>{
                     //Show a snackbar with the success message
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Request has been sent to $email successfully!'),
+                        content: Text(
+                          lanNotifier.translate('request') + ' $email',
+                        ),
                       ),
                     );
                   }
@@ -501,13 +506,14 @@ class _HomePageState extends State<HomePage>{
 }
 
   Future<bool> _addUser() async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     final String email = _emailController.text;
 
     //check if the entered email is the same as the current user's email
     if (email == _auth.currentUser!.email) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You cannot add yourself'),
+        SnackBar(
+          content: Text(lanNotifier.translate('cannotAddSelf')),
         ),
       );
       return false;
@@ -534,8 +540,8 @@ class _HomePageState extends State<HomePage>{
       if (contactDoc.exists) {
         //if the user is already in the current user's contacts, display a message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User already in contacts'),
+          SnackBar(
+            content: Text(lanNotifier.translate('userAlreadyExists')),
           ),
         );
 
@@ -573,8 +579,8 @@ class _HomePageState extends State<HomePage>{
     } else {
       //If a user with the entered email does not exist, display an error message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No user with that email'),
+        SnackBar(
+          content: Text(lanNotifier.translate('enteredEmail')),
         ),
       );
 

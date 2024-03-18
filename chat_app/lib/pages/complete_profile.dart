@@ -1,9 +1,11 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
+import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/home_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CompleteProfile extends StatefulWidget {
   const CompleteProfile({super.key});
@@ -17,13 +19,14 @@ class _CompleteProfileState extends State<CompleteProfile> {
   final nameController = TextEditingController();
 
   Future completeGoogleProfile(User user) async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     print('completeGoogleProfile called');
     // await checkUserProfile(user);
 
     try {
       if (areFieldsEmpty()) {
         Navigator.pop(context);
-        showErrorMsg('Please fill in all fields');
+        showErrorMsg(lanNotifier.translate('fillFields'));
         return;
       }
 
@@ -41,13 +44,13 @@ class _CompleteProfileState extends State<CompleteProfile> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile completed successfully'),
+        SnackBar(
+          content: Text(lanNotifier.translate('completedProfile')),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
-      showErrorMsg('An error occurred, please try again: $e');
+      showErrorMsg(lanNotifier.translate('error') + e.toString());
     }
   }
 
@@ -86,6 +89,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
 
@@ -103,8 +107,8 @@ class _CompleteProfileState extends State<CompleteProfile> {
 
                   const SizedBox(height: 25),
 
-                  const Text(
-                    'Complete profile',
+                  Text(
+                    lanNotifier.translate('completeProfile'),
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -115,7 +119,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                   //name field
                   MyTextField(
                     controller: nameController, 
-                    hintText: 'Name', 
+                    hintText: lanNotifier.translate('name'), 
                     obscureText: false, 
                     isEnabled: true,
                   ),
@@ -133,7 +137,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                         print('User is null');
                       }
                     }, 
-                    text: 'Save profile',
+                    text: lanNotifier.translate('saveProfile'),
                   ),
                 ],
               ),

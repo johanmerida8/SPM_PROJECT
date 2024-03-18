@@ -45,7 +45,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     future: FirebaseFirestore.instance.collection('imageUser').doc(widget.receiverUserID).get(),
                     builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                       if (snapshot.hasError) {
-                        return const Text('Something went wrong');
+                        return Text(lanNotifier.translate('error'));
                       }
 
                       if (snapshot.hasData && !snapshot.data!.exists) {
@@ -103,7 +103,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         );
                       }
 
-                      return const Text('loading');
+                      return Text(lanNotifier.translate('loading'));
                     },
                   ),
 
@@ -112,11 +112,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     future: users.doc(widget.receiverUserID).get(),
                     builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                       if (snapshot.hasError) {
-                        return const Text('Something went wrong');
+                        return Text(lanNotifier.translate('error'));
                       }
 
                       if (snapshot.hasData && !snapshot.data!.exists) {
-                        return const Text('Document does not exist');
+                        return Text(lanNotifier.translate('documentNotExist'));
                       }
 
                       if (snapshot.connectionState == ConnectionState.done) {
@@ -150,7 +150,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         );
                       }
 
-                      return const Text('loading');
+                      return Text(lanNotifier.translate('loading'));
                     },
                   ),
                 ],

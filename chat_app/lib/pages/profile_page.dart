@@ -61,10 +61,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<bool> saveInfo(String userId, String name, String bio) async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     try {
       final DocumentReference userDoc = _user.doc(userId);
-      //update the contact document
-      // final DocumentReference contactDoc = _user.doc(userId).collection('contacts').doc(userId);
+
+      
 
       //check if the data has been modified
       final DocumentSnapshot docSnapshot = await userDoc.get();
@@ -74,11 +75,14 @@ class _ProfilePageState extends State<ProfilePage> {
       final Map<String, dynamic> currentValues = docSnapshot.data() as Map<String, dynamic>;
       print('currentValues: $currentValues');
 
-      if (currentValues['name'] == name && currentValues['bio'] == bio) {
+      String currentName = currentValues['name'] ?? "";
+      String currentBio = currentValues['bio'] ?? "";
+
+      if (currentName == name && currentBio == bio) {
         print('Data has not been modified');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Data has not been modified'),
+          SnackBar(
+            content: Text(lanNotifier.translate('dataNotModified')),
             backgroundColor: Colors.orange,
           ),
         );
@@ -104,8 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
         //show snackbar of success
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully updated data'),
+          SnackBar(
+            content: Text(lanNotifier.translate('updateData')),
             backgroundColor: Colors.green,
           ),
         );
@@ -232,25 +236,26 @@ class _ProfilePageState extends State<ProfilePage> {
   // }
 
   void showSaveDialog(BuildContext context) {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     showDialog(
       context: context, 
       builder: (context) {
         return AlertDialog(
-          title: const Text('Save'),
-          content: const Text('Do you want to save the changes?'),
+          title: Text(lanNotifier.translate('save')),
+          content: Text(lanNotifier.translate('saveChanges')),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               }, 
-              child: const Text('No')
+              child: Text(lanNotifier.translate('no'))
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 saveProfileImg();
               }, 
-              child: const Text('Yes')
+              child: Text(lanNotifier.translate('yes'))
             ),
           ],
         );

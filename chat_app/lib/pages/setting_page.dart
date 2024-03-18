@@ -27,7 +27,7 @@ class _SettingsPageState extends State<SettingsPage> {
     //shared preference to get the selected language
     SharedPreferences prefs = await SharedPreferences.getInstance();
     //get the selected language from shared preference or default to 'es'
-    String language = prefs.getString('language') ?? 'en';
+    String language = prefs.getString('language') ?? 'es';
     setState(() {
       _selectedLanguage = language;
     });
@@ -43,12 +43,12 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  //variable to store the selected language and default to 'en'
-  String _selectedLanguage = 'en';
+  //variable to store the selected language and default to 'es'
+  String _selectedLanguage = 'es';
 
   @override
   Widget build(BuildContext context) {
-    final lanNotifier = Provider.of<LanguageNotifier>(context);
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
@@ -88,7 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Text(lanNotifier.translate('language')),
                   DropdownButton<String>(
                     value: _selectedLanguage,
-                    items: ['en', 'es'].map((String value) {
+                    items: ['en', 'es', 'pt'].map((String value) {
                       return DropdownMenuItem<String>(
                         child: Text(value),
                         value: value,

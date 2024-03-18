@@ -44,7 +44,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   //initialize the shared preference
-  await Locales.init(['en', 'es']);
+  await Locales.init(['en', 'es', 'pt']);
   LocalNotificationService.initialize();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -55,7 +55,7 @@ void main() async{
   //get the preferred language
   SharedPreferences prefs = await SharedPreferences.getInstance();
   //get the selected language from shared preference or default to 'en'
-  String preferredLang = prefs.getString('language') ?? 'en';
+  String preferredLang = prefs.getString('language') ?? 'es';
 
   runApp(
     MultiProvider(
@@ -132,7 +132,7 @@ Widget build(BuildContext context) {
     builder: (locale) => MaterialApp(
         localizationsDelegates: Locales.delegates,
         supportedLocales: Locales.supportedLocales,
-        locale: Locale(localeNotifier.currentLocale ?? 'en'),
+        locale: Locale(localeNotifier.currentLocale ?? 'es'),
         debugShowCheckedModeBanner: false,
         theme: themeProvider.themeData,
         home: const SplashScreen(),

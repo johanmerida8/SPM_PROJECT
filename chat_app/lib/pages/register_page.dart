@@ -44,8 +44,8 @@ class _RegisterPageState extends State<RegisterPage> {
     final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     if (passwordController.text != confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Passwords do not match"),
+        SnackBar(
+          content: Text(lanNotifier.translate('passwordNotMatch')),
         ),
       );
       return;
@@ -84,8 +84,8 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('Please verify your email'),
+            SnackBar(
+              content: Text(lanNotifier.translate('verifyEmail')),
               backgroundColor: Color.fromRGBO(255, 152, 0, 1),
               duration: Duration(seconds: 8),
             ),
@@ -99,8 +99,8 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('Successfully created an account!'),
+            SnackBar(
+              content: Text(lanNotifier.translate('accountCreated')),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 3),
             ),
@@ -149,8 +149,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   const SizedBox(height: 25),
                   //create account message
-                  const Text(
-                    "Let's create an account for you!",
+                  Text(
+                    lanNotifier.translate('createAccount'),
                     style: TextStyle(
                       fontSize: 16,
                       // fontWeight: FontWeight.bold

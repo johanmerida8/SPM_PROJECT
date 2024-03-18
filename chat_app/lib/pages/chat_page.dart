@@ -101,7 +101,8 @@ class _ChatPageState extends State<ChatPage> {
 
   //delete message
   void deleteMsg(String msg) async {
-    await _chatService.deleteMsg(widget.receiverUserID, msg);
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
+    await _chatService.deleteMsg(widget.receiverUserID, msg, lanNotifier.translate('messageDeleted'), lanNotifier.translate('messageDeleted'));
   }
 
   //format the date to show the time if the message was sent today or yesterday, otherwise show the date
@@ -161,7 +162,7 @@ class _ChatPageState extends State<ChatPage> {
                       child: Row(
                         children: [
                           Text(
-                            data['name'] ?? 'Unknown',
+                            data['name'] ?? lanNotifier.translate('unknown'),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -176,9 +177,9 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     );
                   } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
+                    return Text(lanNotifier.translate('error'));
                   } else {
-                    return const Text('Loading...');
+                    return Text(lanNotifier.translate('loading'));
                   }
                 },
               ),
@@ -203,16 +204,17 @@ class _ChatPageState extends State<ChatPage> {
 
 //build message list
   Widget _buildMessageList() {
+    final lanNotifier = Provider.of<LanguageNotifier>(context);
     return StreamBuilder(
       stream:
           _chatService.getMsg(widget.receiverUserID, _auth.currentUser!.uid),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Text('Error${snapshot.hasError}}');
+          return Text(lanNotifier.translate('error'));
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading...');
+          return Text(lanNotifier.translate('loading'));
         }
 
         return ListView.builder(
@@ -248,7 +250,7 @@ class _ChatPageState extends State<ChatPage> {
           showDialog(
             context: context, 
             builder: (BuildContext context) {
-              final lanNotifier = Provider.of<LanguageNotifier>(context);
+              final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
               return AlertDialog(
                 title: Text(lanNotifier.translate('deleteMsg')),
                 content: Text(data['message']),
@@ -262,16 +264,24 @@ class _ChatPageState extends State<ChatPage> {
                   TextButton(
                     onPressed: () {
                       //delete the message calling the deleteMsg method from the chat service
-                      _chatService.deleteMsg(widget.receiverUserID, document.id);
+                      // String deletedMsgTxt = lanNotifier.translate('messageDeleted');
+                      _chatService.deleteMsg(widget.receiverUserID, document.id, lanNotifier.translate('messageDeleted'), lanNotifier.translate('messageDeleted'));
                       Navigator.pop(context);
                       //show a snackbar to confirm that the message was deleted
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Message deleted',
+                            lanNotifier.translate('messageDeleted'),
                             style: TextStyle(
                               color: Colors.red
                             ),
+                          ),
+                          action: SnackBarAction(
+                            label: lanNotifier.translate('undo'),
+                            onPressed: () {
+                              //undo the message deletion calling the undoMsgDelete method from the chat service
+                              _chatService.undoMsgDelete(widget.receiverUserID, document.id, data['message']);
+                            },
                           ),
                         )
                       );
@@ -305,7 +315,7 @@ class _ChatPageState extends State<ChatPage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        updateSuccessful ? 'Message updated' : 'Message has already been updated',
+                                        updateSuccessful ? lanNotifier.translate('messageUpdated') : lanNotifier.translate('messageAlreadyUpdated'),
                                         style: TextStyle(
                                           color: updateSuccessful ? Colors.green : Colors.deepOrange
                                         ),
@@ -364,7 +374,7 @@ class _ChatPageState extends State<ChatPage> {
   //build message input
   Widget _buildMessageInput() {
     // String otherUserEmail = widget.receiverUserEmail;
-    final lanNotifier = Provider.of<LanguageNotifier>(context);
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
     String otherUserID = widget.receiverUserID;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),

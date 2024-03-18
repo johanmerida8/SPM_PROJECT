@@ -37,56 +37,110 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+  //error messages
+  // Map<String, String> errorMessages (LanguageNotifier lanNotifier) {
+  //   return {
+  //     'invalid-email': lanNotifier.translate('invalidEmail'),
+  //     'user-not-found': lanNotifier.translate('userNotFound'),
+  //     'wrong-password': lanNotifier.translate('wrongPassword'),
+  //   };
+  // }
+
   // sign in user
   void signIn() async {
-    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
-    //get the auth service
-    final authService = Provider.of<AuthService>(context, listen: false);
+  final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
+  //get the auth service
+  final authService = Provider.of<AuthService>(context, listen: false);
 
-    //Show a SnackBar with a circular progress indicator while signing in
-      final snackBar = SnackBar(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 20),
-            Text(lanNotifier.translate('signing')),
-          ],
+  //validate email and password
+  if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+    final snackBar = SnackBar(
+      content: Text(
+        lanNotifier.translate('fillFields'),
+        style: const TextStyle(
+          color: Colors.white,
         ),
-        duration: Duration(seconds: 3),
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
+      ),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    return;
+  }
 
-    try {
-      UserCredential userCredential = await authService.signInWithEmailandPassword(
-        emailController.text, 
-        passwordController.text
-      );
-      User? user = userCredential.user;
-      //check if the email is verified
-      print('Email is verified: ${user?.emailVerified}');
+  //Show a SnackBar with a circular progress indicator while signing in
+  final snackBar = SnackBar(
+    content: Row(
+      children: [
+        CircularProgressIndicator(),
+        SizedBox(width: 20),
+        Text(lanNotifier.translate('signing')),
+      ],
+    ),
+    // duration: Duration(seconds: 3),
+  );
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
-      //set user status to online
-      setUserStatusOnline();
+  try {
+    UserCredential userCredential = await authService.signInWithEmailandPassword(
+      emailController.text, 
+      passwordController.text
+    );
+    User? user = userCredential.user;
+    //check if the email is verified
+    print('Email is verified: ${user?.emailVerified}');
 
-      //Navigate to the contacts page
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.toString(),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+    //set user status to online
+    setUserStatusOnline();
+
+    //Navigate to the contacts page
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
+  } catch (e) {
+    if (e is FirebaseAuthException) {
+      print('Error code: ${e.code}');
+    } else {
+      print(e.toString());
     }
   }
+}
+
+//   void showErrorMsg(String errorCode, LanguageNotifier lanNotifier) async {
+//   print('Error code: $errorCode');
+//   String errorMessage;
+
+//   switch (errorCode) {
+//     case 'invalidEmail':
+//       errorMessage = lanNotifier.translate('invalidEmail');
+//       break;
+//     case 'userNotFound':
+//       errorMessage = lanNotifier.translate('userNotFound');
+//       break;
+//     case 'wrongPassword':
+//       errorMessage = lanNotifier.translate('wrongPassword');
+//       break;
+//     default:
+//       errorMessage = lanNotifier.translate('unknownError');
+//       break;
+//   }
+
+//   await Future.delayed(Duration(seconds: 3));
+
+//   final snackBar = SnackBar(
+//     content: Text(
+//       errorMessage,
+//       style: const TextStyle(
+//         color: Colors.white,
+//       ),
+//     ),
+//     backgroundColor: Colors.red,
+//   );
+//   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+// }
 
   // @override
   // void initState() {
@@ -132,8 +186,8 @@ class _LoginPageState extends State<LoginPage> {
         
                   const SizedBox(height: 25),
                   //welcome back message
-                  const Text(
-                    'Welcome back you\'ve been missed!',
+                  Text(
+                    lanNotifier.translate('welcomeBack'),
                     style: TextStyle(
                       fontSize: 16,
                       // fontWeight: FontWeight.bold

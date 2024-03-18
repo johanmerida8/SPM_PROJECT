@@ -29,6 +29,19 @@ class _DeleteProfileState extends State<DeleteProfile> {
   final emailController = TextEditingController();
 
   deleteProfile() async {
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
+    //check if the user has entered their email
+    if (emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(lanNotifier.translate('deleteEmailNull')),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print('Please enter your email');
+      return;
+    }
+
     //Get the current user from the authentication
     User? user = _auth.currentUser;
 
@@ -60,8 +73,8 @@ class _DeleteProfileState extends State<DeleteProfile> {
     } else {
       //the entered email does not match the current user's email
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('The entered email does not match the current user\'s email'),
+        SnackBar(
+          content: Text(lanNotifier.translate('deleteEmailMatch')),
           backgroundColor: Colors.red,
         ),
       );
@@ -89,7 +102,7 @@ class _DeleteProfileState extends State<DeleteProfile> {
                 const SizedBox(height: 25),
 
                 Text(
-                  'Enter your email to delete your profile',
+                  lanNotifier.translate('deleteText'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
