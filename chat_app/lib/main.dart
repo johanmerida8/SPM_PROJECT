@@ -8,6 +8,7 @@ import 'package:chat_app/language/locale_notifier.dart';
 // import 'package:chat_app/pages/notification_provider.dart';
 // import 'package:chat_app/pages/notification_page.dart';
 import 'package:chat_app/pages/splash_screen.dart';
+import 'package:chat_app/providers/unread_message.dart';
 // import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
@@ -27,8 +28,6 @@ import 'package:flutter_locales/flutter_locales.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 //this will help navigate to other screens easily
 // final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -41,12 +40,19 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 // LocalNotificationService localNotificationService = LocalNotificationService();
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //initialize the shared preference
   await Locales.init(['en', 'es', 'pt']);
   LocalNotificationService.initialize();
+  //initialize the primary firebase app
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  //initialize secondary firebase project
+  await Firebase.initializeApp(
+    name: 'SecondaryApp',
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   //lock the orientation to portrait
@@ -63,6 +69,7 @@ void main() async{
         ChangeNotifierProvider(create: (_) => AuthService()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LanguageNotifier(preferredLang)),
+        ChangeNotifierProvider(create: (_) => UnreadMessagesModel())
       ],
       child: const MyApp(),
     ),
@@ -77,11 +84,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // LocalNotificationService localNotificationService = LocalNotificationService();
-  
+
   @override
   void initState() {
     super.initState();
@@ -106,38 +112,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-    void setUserStatusOnline() async {
+  void setUserStatusOnline() async {
     if (_auth.currentUser != null) {
       await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_auth.currentUser!.uid)
-        .update({'status': 'online'});
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .update({'status': 'online'});
     }
   }
 
   void setUserStatusOffline() async {
     if (_auth.currentUser != null) {
       await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_auth.currentUser!.uid)
-        .update({'status': 'offline'});
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .update({'status': 'offline'});
     }
   }
 
   @override
-Widget build(BuildContext context) {
-  final themeProvider = Provider.of<ThemeProvider>(context);
-  final localeNotifier = Provider.of<LanguageNotifier>(context);
-  return LocaleBuilder(
-    builder: (locale) => MaterialApp(
-        localizationsDelegates: Locales.delegates,
-        supportedLocales: Locales.supportedLocales,
-        locale: Locale(localeNotifier.currentLocale ?? 'es'),
-        debugShowCheckedModeBanner: false,
-        theme: themeProvider.themeData,
-        home: const SplashScreen(),
-      )
-    );
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final localeNotifier = Provider.of<LanguageNotifier>(context);
+    return LocaleBuilder(
+        builder: (locale) => MaterialApp(
+              localizationsDelegates: Locales.delegates,
+              supportedLocales: Locales.supportedLocales,
+              locale: Locale(localeNotifier.currentLocale ?? 'es'),
+              debugShowCheckedModeBanner: false,
+              theme: themeProvider.themeData,
+              home: const SplashScreen(),
+            ));
   }
 }
-

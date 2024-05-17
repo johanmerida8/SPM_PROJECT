@@ -8,6 +8,8 @@ class MyTextField extends StatefulWidget {
     final FocusNode? focusNode;
     final Function(String)? onChanged;
     final bool isEnabled;
+    final Widget? prefixIcon;
+    final Widget? suffixIcon;
 
   const MyTextField({
     super.key,
@@ -17,6 +19,8 @@ class MyTextField extends StatefulWidget {
     this.focusNode,
     this.onChanged,
     required this.isEnabled,
+    this.prefixIcon,
+    this.suffixIcon,
   });
 
   @override
@@ -52,7 +56,8 @@ class _MyTextFieldState extends State<MyTextField> {
           color: Colors.grey
         ),
         enabled: widget.isEnabled,
-        suffixIcon: widget.obscureText ? IconButton(
+        prefixIcon: widget.prefixIcon,
+        suffixIcon: widget.suffixIcon ?? (widget.obscureText ? IconButton(
           icon: Icon(
             isPasswordVisible ? Icons.visibility : Icons.visibility_off,
           ),
@@ -61,7 +66,7 @@ class _MyTextFieldState extends State<MyTextField> {
               isPasswordVisible = !isPasswordVisible;
             });
           },
-        ) : null,
+        ) : null),
       ),
     );
   }

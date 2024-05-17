@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChatBubble extends StatelessWidget {
-  final String msg;
+  final Widget content;
   final Color bubbleColor;
   final bool isDeleted;
   const ChatBubble({
     super.key,
-    required this.msg,
+    required this.content,
     required this.bubbleColor,
     this.isDeleted = false,
   });
@@ -22,13 +22,7 @@ class ChatBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         color: bubbleColor,
       ),
-      child: Text(
-        isDeleted ? lanNotifier.translate('messageDeleted') : msg,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-      ),
+      child: isDeleted ? Text(lanNotifier.translate('messageDeleted')) : content,
     );
   }
 }

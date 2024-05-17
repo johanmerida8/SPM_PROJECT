@@ -49,6 +49,11 @@ dependencies:
   permission_handler: ^11.2.0
   google_sign_in: ^6.2.1
   flutter_locales: ^3.0.1
+  google_nav_bar: ^5.0.6
+  badges: ^3.1.2
+  photo_view: ^0.15.0
+  cached_network_image: ^3.3.1
+  internet_connection_checker: ^1.0.0+1
   
 
 dev_dependencies:
@@ -84,6 +89,7 @@ flutter:
      - assets/images/
      - assets/locales/en.json
      - assets/locales/es.json
+     - assets/locales/pt.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -96,10 +102,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: Pacifico
+      fonts:
+        - asset: fonts/Pacifico-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

@@ -149,9 +149,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
           if (imageUrl != null) {
             final image = await NetworkHelper.loadImg(imageUrl);
-            setState(() {
-              _image = image;
-            });
+            if (mounted) {
+              setState(() {
+                _image = image;
+              });
+            }
           }
         }
       } catch (e) {
@@ -201,39 +203,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // void deleteProfileImg() async {
-  //   try {
-  //     //get the user
-  //     if (widget.user != null) {
-  //       //get the document
-  //       DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
-  //         .collection('imageUser')
-  //         .doc(widget.user!.uid)
-  //         .get();
-
-  //         //get the image path
-  //         String imagePath = docSnapshot['imageUrl'];
-          
-  //         //delete image from storage
-  //         await StoreData().deleteImage(imagePath);
-
-  //         //delete image from firestore
-  //         await FirebaseFirestore.instance
-  //           .collection('imageUser')
-  //           .doc(widget.user!.uid)
-  //           .delete();
-          
-  //         //set the image to null
-  //         setState(() {
-  //           _image = null;
-  //         });
-  //     } else {
-  //       print('User is null');
-  //     }
-  //   } catch (e) {
-  //     print('Error deleting profile image: $e');
-  //   }
-  // }
 
   void showSaveDialog(BuildContext context) {
     final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
@@ -277,7 +246,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: Text(lanNotifier.translate('profile')),
+        title: Text(
+          lanNotifier.translate('birdyMate'),
+          style: TextStyle(
+            fontFamily: 'Pacifico',
+            fontSize: 20,
+          ),
+        ),
       ),
       //safe area is used to avoid the notch and the camera hole
       body: SafeArea(
@@ -294,34 +269,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   Stack(
                   children: [
                     GestureDetector(
-                      // onLongPress: () {
-                      //   if (_image != null) {
-                      //     showDialog(
-                      //       context: context,
-                      //       builder: (BuildContext context) {
-                      //         return AlertDialog(
-                      //           title: const Text('Delete'),
-                      //           content: const Text('Do you want to delete the profile image?'),
-                      //           actions: [
-                      //             TextButton(
-                      //               onPressed: () {
-                      //                 Navigator.pop(context);
-                      //               }, 
-                      //               child: const Text('No')
-                      //             ),
-                      //             TextButton(
-                      //               onPressed: () {
-                      //                 Navigator.pop(context);
-                      //                 deleteProfileImg();
-                      //               }, 
-                      //               child: const Text('Yes')
-                      //             ),
-                      //           ],
-                      //         );
-                      //       },
-                      //     );
-                      //   }
-                      // },
                       onTap: () {
                         if (_image != null) {
                           showDialog(

@@ -39,7 +39,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
       Navigator.pushReplacement(
         context, 
         MaterialPageRoute(
-          builder: (context) => const HomePage()
+          builder: (context) => const HomePage(receiverUserID: '')
         )
       );
 

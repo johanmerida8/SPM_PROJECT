@@ -3,7 +3,7 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/home_page.dart';
+import 'package:chat_app/navigations/user_screens.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -110,10 +110,10 @@ class _RegisterPageState extends State<RegisterPage> {
         //set user status to online
         setUserStatusOnline();
 
-        //Navigate to the home page
+        //Navigate to the user screens
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const HomePage(),
+            builder: (context) => const UserScreens(),
           ),
         );
     } catch (e) {

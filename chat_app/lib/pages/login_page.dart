@@ -4,7 +4,7 @@ import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/components/square_tile.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/home_page.dart';
+import 'package:chat_app/navigations/user_screens.dart';
 import 'package:chat_app/pages/reset_password.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,14 +28,14 @@ class _LoginPageState extends State<LoginPage> {
   final User? user = FirebaseAuth.instance.currentUser;
 
   void setUserStatusOnline() async {
-  final User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    await FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .update({'status': 'online'});
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'status': 'online'});
+    }
   }
-}
 
   //error messages
   // Map<String, String> errorMessages (LanguageNotifier lanNotifier) {
@@ -48,66 +48,65 @@ class _LoginPageState extends State<LoginPage> {
 
   // sign in user
   void signIn() async {
-  final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
-  //get the auth service
-  final authService = Provider.of<AuthService>(context, listen: false);
+    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
+    //get the auth service
+    final authService = Provider.of<AuthService>(context, listen: false);
 
-  //validate email and password
-  if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-    final snackBar = SnackBar(
-      content: Text(
-        lanNotifier.translate('fillFields'),
-        style: const TextStyle(
-          color: Colors.white,
+    //validate email and password
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      final snackBar = SnackBar(
+        content: Text(
+          lanNotifier.translate('fillFields'),
+          style: const TextStyle(
+            color: Colors.white,
+          ),
         ),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+
+    //Show a SnackBar with a circular progress indicator while signing in
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 20),
+          Text(lanNotifier.translate('signing')),
+        ],
       ),
-      backgroundColor: Colors.red,
+      // duration: Duration(seconds: 3),
     );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    return;
-  }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
 
-  //Show a SnackBar with a circular progress indicator while signing in
-  final snackBar = SnackBar(
-    content: Row(
-      children: [
-        CircularProgressIndicator(),
-        SizedBox(width: 20),
-        Text(lanNotifier.translate('signing')),
-      ],
-    ),
-    // duration: Duration(seconds: 3),
-  );
-  if (mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
+    try {
+      UserCredential userCredential =
+          await authService.signInWithEmailandPassword(
+              emailController.text, passwordController.text);
+      User? user = userCredential.user;
+      //check if the email is verified
+      print('Email is verified: ${user?.emailVerified}');
 
-  try {
-    UserCredential userCredential = await authService.signInWithEmailandPassword(
-      emailController.text, 
-      passwordController.text
-    );
-    User? user = userCredential.user;
-    //check if the email is verified
-    print('Email is verified: ${user?.emailVerified}');
+      //set user status to online
+      setUserStatusOnline();
 
-    //set user status to online
-    setUserStatusOnline();
-
-    //Navigate to the contacts page
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const HomePage(),
-      ),
-    );
-  } catch (e) {
-    if (e is FirebaseAuthException) {
-      print('Error code: ${e.code}');
-    } else {
-      print(e.toString());
+      //Navigate to the user screens
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const UserScreens(),
+        ),
+      );
+    } catch (e) {
+      if (e is FirebaseAuthException) {
+        print('Error code: ${e.code}');
+      } else {
+        print(e.toString());
+      }
     }
   }
-}
 
 //   void showErrorMsg(String errorCode, LanguageNotifier lanNotifier) async {
 //   print('Error code: $errorCode');
@@ -154,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
   //   bool signInSuccessful = await _authService?.signInWithGoogle();
   //   if (signInSuccessful) {
   //     Navigator.push(
-  //       context, 
+  //       context,
   //       MaterialPageRoute(builder: (context) => const HomePage())
   //     );
   //   } else {
@@ -183,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 50),
                   //logo
                   const Icon(Icons.message, size: 80),
-        
+
                   const SizedBox(height: 25),
                   //welcome back message
                   Text(
@@ -193,61 +192,54 @@ class _LoginPageState extends State<LoginPage> {
                       // fontWeight: FontWeight.bold
                     ),
                   ),
-        
+
                   const SizedBox(height: 25),
                   //email textfield
                   MyTextField(
                       controller: emailController,
                       hintText: lanNotifier.translate('email'),
                       obscureText: false,
-                      isEnabled: true
-                  ),
-        
+                      isEnabled: true),
+
                   const SizedBox(height: 15),
                   //password textfield
                   MyTextField(
                       controller: passwordController,
                       hintText: lanNotifier.translate('password'),
                       obscureText: true,
-                      isEnabled: true
-                  ),
-        
+                      isEnabled: true),
+
                   const SizedBox(height: 15),
 
                   //reset password
-                  
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context, 
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context,
                               MaterialPageRoute(builder: (context) {
-                                return const ResetPassword();
-                              })
-                            );
-                          },
-                          child: Text(
-                            lanNotifier.translate('forgotPassword'),
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            return const ResetPassword();
+                          }));
+                        },
+                        child: Text(
+                          lanNotifier.translate('forgotPassword'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                  
+                      ),
+                    ],
+                  ),
 
                   const SizedBox(height: 25),
-        
+
                   //sign in button
                   MyButton(
-                    onTap: signIn, 
-                    text: lanNotifier.translate('signin')
-                  ),
-        
+                      onTap: signIn, text: lanNotifier.translate('signin')),
+
                   const SizedBox(height: 50),
 
                   //or continue with
@@ -289,7 +281,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       //google icon
                       SquareTile(
-                        imgPath: 'assets/images/google.png', 
+                        imgPath: 'assets/images/google.png',
                         // onTap: handleSignIn,
                         onTap: () => AuthService().signInWithGoogle(context),
                       )
@@ -297,9 +289,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
                   const SizedBox(height: 50),
-        
+
                   //not a member? register now
-        
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

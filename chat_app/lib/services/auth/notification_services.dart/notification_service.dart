@@ -11,43 +11,46 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 //instance of auth
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class LocalNotificationService {
-
-  static String serverKey = "AAAAqR7ocpU:APA91bEftNeeAB9anYEaEchQ2knFbzJZApJomaLzalUUEd_5KXdHMJr3PsYpgLXLiatqFNzB54WCnBSN0_6ek0RwF2qDzJcNAoR4220WUHhHUtcmy-A-IhPXH2q6T-0w4bkaKKnMkFtG";
+  static String serverKey =
+      "AAAAqR7ocpU:APA91bEftNeeAB9anYEaEchQ2knFbzJZApJomaLzalUUEd_5KXdHMJr3PsYpgLXLiatqFNzB54WCnBSN0_6ek0RwF2qDzJcNAoR4220WUHhHUtcmy-A-IhPXH2q6T-0w4bkaKKnMkFtG";
 
   static final FlutterLocalNotificationsPlugin
-  _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-    static Future<void> initialize() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final bool notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+  static Future<void> initialize() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool notificationsEnabled =
+        prefs.getBool('notificationsEnabled') ?? true;
 
-  if (notificationsEnabled) {
-    final InitializationSettings initializationSettings =
-        InitializationSettings(
-            android: AndroidInitializationSettings("@mipmap/ic_launcher"));
-    _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    if (notificationsEnabled) {
+      final InitializationSettings initializationSettings =
+          InitializationSettings(
+              android: AndroidInitializationSettings("@mipmap/ic_launcher"));
+      _flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    ).then((settings) {
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('User granted permission');
-      } else if (settings.authorizationStatus ==
-          AuthorizationStatus.provisional) {
-        print('User granted provisional permission');
-      } else {
-        print('User declined or has not accepted permission');
-      }
-    });
+      FirebaseMessaging.instance
+          .requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      )
+          .then((settings) {
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          print('User granted permission');
+        } else if (settings.authorizationStatus ==
+            AuthorizationStatus.provisional) {
+          print('User granted provisional permission');
+        } else {
+          print('User declined or has not accepted permission');
+        }
+      });
+    }
   }
-} 
 
-  static void display(RemoteMessage message) async{
+  static void display(RemoteMessage message) async {
     try {
       print("In Notification method");
       // int id = DateTime.now().microsecondsSinceEpoch ~/1000000;
@@ -55,48 +58,43 @@ class LocalNotificationService {
       int id = random.nextInt(1000);
       final NotificationDetails notificationDetails = NotificationDetails(
           android: AndroidNotificationDetails(
-            "birdy_mate",
-            "birdy mate",
-            importance: Importance.max,
-            priority: Priority.high,
-          )
-
-      );
+        "birdy_mate",
+        "birdy mate",
+        importance: Importance.max,
+        priority: Priority.high,
+      ));
       print("my id is ${id.toString()}");
       await _flutterLocalNotificationsPlugin.show(
-
         id,
         message.notification!.title,
         message.notification!.title,
-        notificationDetails,);
+        notificationDetails,
+      );
     } on Exception catch (e) {
       print('Error>>>$e');
     }
   }
 
-  sendNotification(String title, String? message, String token) async {
-
+  sendNotification(String title, String? message, String token, [String? imageUrl]) async {
     print('token is $token');
     final data = {
       'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-      'id': '1', 
+      'id': '1',
       'status': 'done',
       'message': message,
+      'image': imageUrl
     };
 
     try {
-      http.Response res = await 
-      http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'), 
-      headers: <String,String> {
-        'Content-Type': 'application/json',
-        'Authorization': 'key=$serverKey'
-      },
-      body: jsonEncode(
-          <String, dynamic> {
-            'notification': <String, dynamic> {
-              'body': message,
-              'title': title
-            },
+      http.Response res = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverKey'
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{'body': message, 'title': title},
             'priority': 'high',
             'data': data,
             'to': '$token'
@@ -110,8 +108,7 @@ class LocalNotificationService {
       } else {
         print(res.statusCode);
       }
-
-    }catch(e){
+    } catch (e) {
       print('exception $e');
     }
   }
@@ -123,7 +120,7 @@ class LocalNotificationService {
       FirebaseFirestore.instance
           .collection('users')
           .doc(_auth.currentUser!.uid)
-          .set({'token': token}, SetOptions(merge: true));  
+          .set({'token': token}, SetOptions(merge: true));
     } catch (e) {
       print('exception $e');
     }
