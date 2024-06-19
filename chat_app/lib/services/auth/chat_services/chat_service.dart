@@ -69,16 +69,19 @@ class ChatService extends ChangeNotifier {
 
     //get image url
     final imageUrl = await ref.getDownloadURL();
-    await sendMsg(receiverId, imageUrl, MessageType.image);
+
+    //get the current time
+    final Timestamp messageSentTime = Timestamp.now();
+
+    await sendMsg(receiverId, imageUrl, MessageType.image, messageSentTime);
   }
 
   //SEND MESSAGE
-  Future<void> sendMsg(String receiverId, String msg, MessageType type) async {
+  Future<void> sendMsg(String receiverId, String msg, MessageType type, Timestamp messageSentTime) async {
     try {
       //get current user info
       final String currentUserId = _auth.currentUser!.uid;
       final String currentUserEmail = _auth.currentUser!.email.toString();
-      final Timestamp timestamp = Timestamp.now();
 
       //create a new message
       Message newMessage = Message(
@@ -86,8 +89,9 @@ class ChatService extends ChangeNotifier {
         senderEmail: currentUserEmail,
         receiverId: receiverId,
         message: msg,
+        msgSentTime: messageSentTime,
         type: type,
-        timestamp: timestamp,
+        timestamp: messageSentTime,
         isRead: false,
         isDelivered: false,
       );
@@ -108,8 +112,6 @@ class ChatService extends ChangeNotifier {
       //update isDelivered to true after the message has been sent to the database
       docRef.update({'isDelivered': true});
 
-      
-
       //increment the unread messages field for the receiver
       await _firestore
           .collection('users')
@@ -122,62 +124,6 @@ class ChatService extends ChangeNotifier {
       print('Error sending message: $e');
     }
   }
-
-  //REPLY MESSAGE
-//   Future<void> replyMsg(String originalMessageId, String receiverId, String reply, MessageType type) async {
-//   try {
-//     // get current user info
-//     final String currentUserId = _auth.currentUser!.uid;
-//     final String currentUserEmail = _auth.currentUser!.email.toString();
-//     final Timestamp timestamp = Timestamp.now();
-
-//     // create a new message
-//     Message newMessage = Message(
-//       senderId: currentUserId,
-//       senderEmail: currentUserEmail,
-//       receiverId: receiverId,
-//       message: reply,
-//       type: type,
-//       timestamp: timestamp,
-//       isRead: false,
-//       isDelivered: false,
-//       isReplied: true, // this is a reply, so set isReplied to true
-//     );
-
-//     // construct chat room id from current user id and receiver id (sorted to ensure uniqueness)
-//     List<String> ids = [currentUserId, receiverId];
-//     ids.sort(); // sort the ids (this ensures the chat room id is always the same for any pair of people)
-//     String chatRoomId = ids.join("_"); // combine the ids into a single string to use a chatroom id
-
-//     // add new message to database
-//     DocumentReference docRef = await _firestore
-//         .collection('chat_rooms')
-//         .doc(chatRoomId)
-//         .collection('messages')
-//         .add(newMessage.toMap());
-
-//     // update isDelivered to true after the message has been sent to the database
-//     docRef.update({'isDelivered': true});
-
-//     // update isReplied to true for the original message
-//     await _firestore
-//         .collection('chat_rooms')
-//         .doc(chatRoomId)
-//         .collection('messages')
-//         .doc(originalMessageId)
-//         .update({'isReplied': true});
-
-//     // increment the unread messages field for the receiver
-//     await _firestore
-//         .collection('users')
-//         .doc(receiverId)
-//         .collection('contacts')
-//         .doc(currentUserId)
-//         .set({'unreadMessages': FieldValue.increment(1)}, SetOptions(merge: true));
-//   } catch (e) {
-//     print('Error sending reply: $e');
-//   }
-// }
 
   //GET MESSAGE
   Stream<QuerySnapshot> getMsg(String userId, String otherUserId) {

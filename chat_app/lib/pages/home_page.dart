@@ -302,6 +302,76 @@ class _HomePageState extends State<HomePage> {
                     });
                   },
                 ),
+                StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance.collection('users').doc(_auth.currentUser!.uid).snapshots(), 
+                  builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return const Icon(Icons.person);
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+                    return Stack(
+                      children: <Widget>[
+                        IconButton(
+                          onPressed: () async {
+                            //reset the friendRequests field to 0
+                            await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(_auth.currentUser!.uid)
+                              .set({
+                                'friendRequests': 0,
+                              }, SetOptions(merge: true));
+                            showDialog(
+                              context: context, 
+                              builder: (BuildContext context) {
+                                return Dialog(
+                                  child: Container(
+                                    height: 400,
+                                    child: SingleChildScrollView(
+                                      child: Container(
+                                        height: 300,
+                                        child: _buildContactRequestList(),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                            );
+                          }, 
+                          icon: const Icon(Icons.person),
+                        ),
+                        if (data['friendRequests'] != null && data['friendRequests'] > 0)
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 20,
+                              minHeight: 20,
+                            ),
+                            child: Text(
+                              data['friendRequests'].toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  
+                ),
               ],
             ),
             Center(
@@ -332,10 +402,7 @@ class _HomePageState extends State<HomePage> {
       // drawer: const MenuSideBar(),
       body: Column(
         children: [
-          // _buildAddUserBar(),
-          Flexible(flex: 1, child: _buildContactRequestList()),
           Expanded(
-            flex: 3,
             child: buildBody(),
           ),
         ],
@@ -455,7 +522,7 @@ class _HomePageState extends State<HomePage> {
                                       return Text(lanNotifier.translate('loading'));
                                     default:
                                       if (snapshot.data!.docs.isEmpty) {
-                                        return Text('No messages yet');
+                                        return Text(lanNotifier.translate('noMessageYet'));
                                       } else {
                                         final latestMsg = snapshot.data!.docs.first.data() as Map<String, dynamic>;
                                         Timestamp timestamp = latestMsg['timestamp'] as Timestamp;
@@ -764,6 +831,14 @@ class _HomePageState extends State<HomePage> {
       print('Request sent to $email');
       //Clear the text field
       _emailController.clear();
+
+      //Increment the friendRequest field in the user's document
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(targetUserId)
+          .set({
+            'friendRequests': FieldValue.increment(1),
+          }, SetOptions(merge: true));
 
       //Return true to indicate that the user was added successfully
       return true;

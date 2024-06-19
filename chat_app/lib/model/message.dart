@@ -7,9 +7,9 @@ class Message {
   final String message;
   final MessageType type;
   final Timestamp timestamp;
+  final Timestamp msgSentTime;
   bool isRead;
   bool isDelivered;
-  bool isReplied;
 
   Message({
     required this.senderId,
@@ -18,9 +18,9 @@ class Message {
     required this.message,
     required this.type,
     required this.timestamp,
+    required this.msgSentTime,
     this.isRead = false,
     this.isDelivered = false,
-    this.isReplied = false,
   });
 
   //convert to a map
@@ -32,9 +32,9 @@ class Message {
       'message': message,
       'type': type == MessageType.image ? 'image' : 'text',
       'timestamp': timestamp,
+      'msgSentTime': msgSentTime,
       'isRead': isRead,
       'isDelivered': isDelivered,
-      'isReplied': isReplied,
     };
   }
 }

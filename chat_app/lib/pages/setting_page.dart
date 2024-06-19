@@ -1,8 +1,8 @@
 // import 'package:chat_app/pages/notification_provider.dart';
 import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/pages/delete_profile_page.dart';
+import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
-import 'package:chat_app/services/auth/login_or_register.dart';
 import 'package:chat_app/theme/theme_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> {
       // Navigate to the login page
 
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginOrRegister()));
+          MaterialPageRoute(builder: (context) => const AuthGate()));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -173,7 +173,30 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
-                signOut(context);
+                showDialog(
+                  context: context, 
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(lanNotifier.translate('loggingOut')),
+                      content: Text(lanNotifier.translate('logoutMsg')),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          }, 
+                          child: Text(lanNotifier.translate('cancel')),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            signOut(context);
+                            Navigator.of(context).pop();
+                          }, 
+                          child: Text(lanNotifier.translate('logout')),
+                        ),
+                      ],
+                    );
+                  }
+                );
               },
               child: Container(
                 decoration: BoxDecoration(

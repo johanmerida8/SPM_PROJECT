@@ -108,63 +108,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-//   void showErrorMsg(String errorCode, LanguageNotifier lanNotifier) async {
-//   print('Error code: $errorCode');
-//   String errorMessage;
-
-//   switch (errorCode) {
-//     case 'invalidEmail':
-//       errorMessage = lanNotifier.translate('invalidEmail');
-//       break;
-//     case 'userNotFound':
-//       errorMessage = lanNotifier.translate('userNotFound');
-//       break;
-//     case 'wrongPassword':
-//       errorMessage = lanNotifier.translate('wrongPassword');
-//       break;
-//     default:
-//       errorMessage = lanNotifier.translate('unknownError');
-//       break;
-//   }
-
-//   await Future.delayed(Duration(seconds: 3));
-
-//   final snackBar = SnackBar(
-//     content: Text(
-//       errorMessage,
-//       style: const TextStyle(
-//         color: Colors.white,
-//       ),
-//     ),
-//     backgroundColor: Colors.red,
-//   );
-//   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-// }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _authService = AuthService(context: context);
-  // }
-
-  // AuthService? _authService;
-
-  // void handleSignIn() async {
-  //   bool signInSuccessful = await _authService?.signInWithGoogle();
-  //   if (signInSuccessful) {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => const HomePage())
-  //     );
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Sign in failed'),
-  //         backgroundColor: Colors.red,
-  //       ),
-  //     );
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

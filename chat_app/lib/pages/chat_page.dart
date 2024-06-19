@@ -20,6 +20,8 @@ import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
+import 'package:encrypt/encrypt.dart' as encrypt;
+
 class ChatPage extends StatefulWidget {
   final String receiverUserName;
   final String receiverUserEmail;
@@ -40,13 +42,20 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _msgController = TextEditingController();
   final TextEditingController _msgEditController = TextEditingController();
-  final TextEditingController _msgReplyController = TextEditingController();
+  // final TextEditingController _msgReplyController = TextEditingController();
   final ChatService _chatService = ChatService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore database = FirebaseFirestore.instance;
 
   //for textfield focus
   final FocusNode _focusNode = FocusNode();
+
+  String encryptedText = '';
+  String decryptedText = '';
+
+  final key = encrypt.Key.fromUtf8('');
+  final iv = encrypt.IV.fromLength(16);
+  final encrypter = encrypt.Encrypter(encrypt.AES(encrypt.Key.fromUtf8('my 32 length key................')));
 
   //update date
   // Timer? _timer;
@@ -101,10 +110,11 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
+    final Timestamp messageSentTime = Timestamp.now();
     //only send message if there is something to send
     if (_msgController.text.isNotEmpty) {
       await _chatService.sendMsg(
-          widget.receiverUserID, _msgController.text, MessageType.text);
+          widget.receiverUserID, _msgController.text, MessageType.text, messageSentTime);
 
       // After sending the message, set 'typing' to false
       FirebaseFirestore.instance
@@ -405,8 +415,8 @@ class _ChatPageState extends State<ChatPage> {
             ],
           );
         });
-  }
-},
+      }
+    },
 
       child: Container(
         alignment: alignment,
@@ -420,9 +430,6 @@ class _ChatPageState extends State<ChatPage> {
                 ? MainAxisAlignment.end
                 : MainAxisAlignment.start,
             children: [
-              // Text(data['senderEmail']),
-              // const SizedBox(height: 5),
-              //show the message in a chat bubble
               ChatBubble(
                 content: (sendingStatesNotifier.value[data['message']] == true)
                     ? const CircularProgressIndicator()
@@ -434,12 +441,14 @@ class _ChatPageState extends State<ChatPage> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => PhotoView(
-                                                imageProvider: NetworkImage(
-                                                    data['message']),
-                                                minScale: PhotoViewComputedScale
-                                                    .contained,
-                                              )));
+                                        builder: (context) => PhotoView(
+                                        imageProvider: NetworkImage(
+                                            data['message']),
+                                        minScale: PhotoViewComputedScale
+                                            .contained,
+                                      )
+                                    )
+                                  );
                                 },
                                 child: Container(
                                   width: 200, // Set your desired width
@@ -670,6 +679,9 @@ class _ChatPageState extends State<ChatPage> {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       scrollDown();
                     });
+
+                    //clear the message controller
+                    _msgController.clear();
                   } else {
                     print('Message controller is empty. No message to send.');
                   }

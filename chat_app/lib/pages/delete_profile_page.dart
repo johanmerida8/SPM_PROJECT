@@ -1,7 +1,7 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/services/auth/login_or_register.dart';
+import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,34 +28,98 @@ class _DeleteProfileState extends State<DeleteProfile> {
   //controller for the email field
   final emailController = TextEditingController();
 
-  deleteProfile() async {
-    final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
-    //check if the user has entered their email
-    if (emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(lanNotifier.translate('deleteEmailNull')),
-          backgroundColor: Colors.red,
+  @override
+  void initState() {
+    super.initState();
+    checkAuthentication();
+  }
+
+  void checkAuthentication() {
+    _auth.authStateChanges().listen((User? user) {
+      if (user == null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const AuthGate()
+          )
+        );
+      }
+    });
+  }
+
+  Future<bool> deleteProfile(BuildContext context) async {
+  final lanNotifier = Provider.of<LanguageNotifier>(context, listen: false);
+
+  // Show the loading dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false, 
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Dialog(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Text(lanNotifier.translate('loading')),
+            ],
+          ),
         ),
       );
-      print('Please enter your email');
-      return;
+    } 
+  );
+
+  //check if the user has entered their email
+  if (emailController.text.isEmpty) {
+    // Dismiss the loading dialog
+    Navigator.pop(context);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(lanNotifier.translate('deleteEmailNull')),
+        backgroundColor: Colors.red,
+      ),
+    );
+    print('Please enter your email');
+    return false;
+  }
+
+  //Get the current user from the authentication
+  User? user = _auth.currentUser;
+
+  //check if the entered email matches the current user's email
+  if (user != null && user.email == emailController.text) {
+    //get the user's uid
+    String uid = user.uid;
+
+    //delete the user's document from the users collection
+    await _firestore.collection('users').doc(uid).delete();
+
+    // Check if the user signed up with Google
+    bool isGoogleUser = user.providerData.any((userInfo) => userInfo.providerId == 'google.com');
+
+    if (isGoogleUser) {
+      // Force a sign in with Google
+      GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently(suppressErrors: false);
+      if (googleUser != null) {
+        OAuthCredential googleAuthCredential = GoogleAuthProvider.credential(
+          accessToken: (await googleUser.authentication).accessToken,
+          idToken: (await googleUser.authentication).idToken,
+        );
+
+        await user.reauthenticateWithCredential(googleAuthCredential);
+      } else {
+        // Dismiss the loading dialog
+        Navigator.pop(context);
+
+        print('No current Google user');
+        return false;
+      }
     }
 
-    //Get the current user from the authentication
-    User? user = _auth.currentUser;
-
-    //check if the entered email matches the current user's email
-    if (user != null && user.email == emailController.text) {
-      //get the user's uid
-      String uid = user.uid;
-
-      //delete the user's document from the users collection
-      await _firestore.collection('users').doc(uid).delete();
-
-      //delete the user's authentication account
-      await user.delete();
-
+    //delete the user's authentication account
+    await user.delete().then((_) async {
       print('Profile deleted successfully');
 
       //sign out of authentication
@@ -64,23 +128,48 @@ class _DeleteProfileState extends State<DeleteProfile> {
       //sign out of google
       await _googleSignIn.signOut();
 
-      //navigate to the login page
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const LoginOrRegister()
-        )
-      );
-    } else {
-      //the entered email does not match the current user's email
+      //wait for the user to be signed out
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Dismiss the loading dialog
+      Navigator.pop(context);
+
+      // Show the SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(lanNotifier.translate('deleteEmailMatch')),
-          backgroundColor: Colors.red,
+          content: Text(
+            lanNotifier.translate('deletedProfileSuccess'),
+            style: const TextStyle(
+              color: Colors.black,
+            ),
+          ),
         ),
       );
-      print('The entered email does not match the current user\'s email');
-    }
+
+      //authenticate page
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const AuthGate()
+        ),
+        (Route<dynamic> route) => false,
+      );
+    });
+    return true;
+  } else {
+    //the entered email does not match the current user's email
+    // Dismiss the loading dialog
+    Navigator.pop(context);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(lanNotifier.translate('deleteEmailMatch')),
+        backgroundColor: Colors.red,
+      ),
+    );
+    print('The entered email does not match the current user\'s email');
+    return false;
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +210,7 @@ class _DeleteProfileState extends State<DeleteProfile> {
                 const SizedBox(height: 15),
 
                 MyButton(
-                  onTap: deleteProfile,
+                  onTap: () => deleteProfile(context),
                   text: lanNotifier.translate('deleteProfile'),
                 ),
               ],

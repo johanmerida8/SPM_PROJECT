@@ -1,7 +1,7 @@
 import 'package:chat_app/components/my_button.dart';
 import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/home_page.dart';
+import 'package:chat_app/navigations/user_screens.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +39,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
       Navigator.pushReplacement(
         context, 
         MaterialPageRoute(
-          builder: (context) => const HomePage(receiverUserID: '')
+          builder: (context) => const UserScreens(),
         )
       );
 

@@ -4,17 +4,10 @@
 
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-// import 'package:chat_app/pages/notification_page.dart';
-// import 'package:chat_app/pages/notification_provider.dart';
-// import 'package:chat_app/pages/notification_page.dart';
 import 'package:chat_app/pages/splash_screen.dart';
 import 'package:chat_app/providers/unread_message.dart';
-// import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
-// import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
-// import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
-// import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';
 import 'package:chat_app/theme/theme_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,13 +16,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_locales/flutter_locales.dart';
-// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-//this will help navigate to other screens easily
-// final navigatorKey = GlobalKey<NavigatorState>();
+
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // print('Handling a background message ${message.messageId}');
@@ -38,7 +28,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.notification!.toString());
 }
 
-// LocalNotificationService localNotificationService = LocalNotificationService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,11 +37,6 @@ void main() async {
   //initialize the primary firebase app
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  //initialize secondary firebase project
-  await Firebase.initializeApp(
-    name: 'SecondaryApp',
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   //lock the orientation to portrait
@@ -85,8 +69,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // LocalNotificationService localNotificationService = LocalNotificationService();
 
   @override
   void initState() {
