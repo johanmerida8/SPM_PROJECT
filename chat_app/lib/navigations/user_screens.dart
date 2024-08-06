@@ -1,7 +1,7 @@
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/home_page.dart';
-import 'package:chat_app/pages/profile_page.dart';
-import 'package:chat_app/pages/setting_page.dart';
+import 'package:chat_app/screens/home_page.dart';
+import 'package:chat_app/screens/profile_page.dart';
+import 'package:chat_app/screens/setting_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -52,8 +52,8 @@ class _UserScreensState extends State<UserScreens> {
                   gap: 8,
                   tabs: [
                     GButton(
-                      icon: Icons.contact_page, 
-                      text: lanNotifier.translate('contact'),
+                      icon: Icons.chat_rounded, 
+                      text: lanNotifier.translate('chats'),
                       textStyle: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,

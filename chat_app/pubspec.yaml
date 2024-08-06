@@ -37,6 +37,7 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_auth: ^4.15.3
   provider: ^6.1.1
+  path_provider: ^2.1.1
   cloud_firestore: ^4.13.6
   intl: ^0.18.1
   shared_preferences: ^2.2.2
@@ -55,6 +56,15 @@ dependencies:
   cached_network_image: ^3.3.1
   internet_connection_checker: ^1.0.0+1
   encrypt: ^5.0.3
+  file_picker: ^6.0.0
+  webview_flutter: ^3.0.0
+  flutter_sound: ^9.2.13
+  audioplayers: ^6.0.0
+  flutter_reaction_button: ^3.0.0+3
+  emoji_picker_flutter:
+  tab_indicator_styler:
+  ionicons:
+ 
   
 
 dev_dependencies:

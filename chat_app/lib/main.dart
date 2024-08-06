@@ -4,7 +4,7 @@
 
 import 'package:chat_app/firebase_options.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/splash_screen.dart';
+import 'package:chat_app/screens/splash_screen.dart';
 import 'package:chat_app/providers/unread_message.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:chat_app/services/auth/notification_services.dart/notification_service.dart';

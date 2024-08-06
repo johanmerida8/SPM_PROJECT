@@ -76,8 +76,68 @@ class ChatService extends ChangeNotifier {
     await sendMsg(receiverId, imageUrl, MessageType.image, messageSentTime);
   }
 
+  //send chat document
+  Future<void> sendChatDocument(String receiverId, File file) async {
+    //getting document file extension
+    final ext = file.path.split('.').last;
+
+    //storage file ref with path
+    final userId = _auth.currentUser!.uid;
+    final ref = _storage.ref().child(
+        'chat_documents/$userId/${DateTime.now().millisecondsSinceEpoch}');
+
+    //upload document to storage
+    TaskSnapshot snapshot =
+        await ref.putFile(file, SettableMetadata(contentType: 'document/$ext'));
+
+    //print out the upload details
+    print(
+        'File uploaded. Total bytes: ${snapshot.totalBytes}, bytes transferred: ${snapshot.bytesTransferred}');
+
+    //get document url
+    final documentUrl = await ref.getDownloadURL();
+
+    //get the current time
+    final Timestamp messageSentTime = Timestamp.now();
+
+    //send the message with the document url
+    await sendMsg(
+        receiverId, documentUrl, MessageType.document, messageSentTime);
+  }
+
+  //send chat audio
+  Future<void> sendChatAudio(String receiverId, File file) async {
+    //getting audio file extension
+    final ext = file.path.split('.').last;
+
+    //storage file ref with path
+    final userId = _auth.currentUser!.uid;
+    final ref = _storage.ref().child(
+        'chat_audios/$userId/${DateTime.now().millisecondsSinceEpoch}.$ext');
+
+    //upload audio to storage
+    TaskSnapshot snapshot =
+        await ref.putFile(file, SettableMetadata(contentType: 'audio/$ext'));
+
+    //print out the upload details
+    print(
+        'File uploaded. Total bytes: ${snapshot.totalBytes}, bytes transferred: ${snapshot.bytesTransferred}');
+
+    //get audio url
+    final audioUrl = await ref.getDownloadURL();
+
+    //get the current time
+    final Timestamp messageSentTime = Timestamp.now();
+
+    //send the message with the audio url
+    await sendMsg(receiverId, audioUrl, MessageType.audio, messageSentTime);
+  }
+
+  //GET ALL USER EXCEPT BLOCKED USERS
+
   //SEND MESSAGE
-  Future<void> sendMsg(String receiverId, String msg, MessageType type, Timestamp messageSentTime) async {
+  Future<void> sendMsg(String receiverId, String msg, MessageType type,
+      Timestamp messageSentTime) async {
     try {
       //get current user info
       final String currentUserId = _auth.currentUser!.uid;
@@ -125,6 +185,181 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  //REPORT USER
+  Future<void> reportUser(String msgId, String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      final report = {
+        'reportedBy': currentUser!.uid,
+        'messageId': msgId,
+        'messageOwnerId': userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+
+      await _firestore.collection('reports').add(report);
+    } catch (e) {
+      print('Error reporting user: $e');
+    }
+  }
+
+  Future<void> deleteUser(String userId) async {
+  try {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      // Remove contact from current user's contact list
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('contacts')
+          .doc(userId)
+          .delete();
+
+      // Remove contact from the other user's contact list
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('contacts')
+          .doc(currentUser.uid)
+          .delete();
+      
+      notifyListeners(); // Notify listeners if you're using ChangeNotifier
+    }
+  } catch (e) {
+    print('Error deleting user: $e');
+  }
+}
+
+  //BLOCK USER
+  Future<void> blockUser(String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+
+      await _firestore
+          .collection('users')
+          .doc(currentUser!.uid)
+          .collection('blockedContacts')
+          .doc(userId)
+          .set({});
+      notifyListeners();
+    } catch (e) {
+      print('Error blocking user: $e');
+    }
+  }
+
+  //UNBLOCK USER
+  Future<void> unblockUser(String blockedUserId) async {
+    try {
+      final currentUser = _auth.currentUser;
+
+      await _firestore
+          .collection('users')
+          .doc(currentUser!.uid)
+          .collection('blockedContacts')
+          .doc(blockedUserId)
+          .delete();
+    } catch (e) {
+      print('Error unblocking user: $e');
+    }
+  }
+
+  Stream<List<Map<String, dynamic>>> getBlockedUsers(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('blockedContacts')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      final blockedUserIds = snapshot.docs.map((doc) => doc.id).toList();
+
+      final userDocs = await Future.wait(blockedUserIds
+          .map((id) => _firestore.collection('users').doc(id).get()));
+
+      //return the user data as a list of maps
+      return userDocs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    });
+  }
+
+  //GET ALL USER CONTACT EXCEPT BLOCKED USERS
+  Stream<List<Map<String, dynamic>>> getUsersExcludingBlockedUsers() {
+    try {
+      //get the user's contacts
+      return _firestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .collection('contacts')
+          .snapshots()
+          .asyncMap((snapshot) async {
+        //get the user's blocked contacts
+        final blockedUserIds = await _firestore
+            .collection('users')
+            .doc(_auth.currentUser!.uid)
+            .collection('blockedContacts')
+            .get()
+            //get the ids of the blocked users
+            .then((value) => value.docs.map((doc) => doc.id).toList());
+        //get the user data for each contact
+        final userDocs = await Future.wait(snapshot.docs
+            //filter out the blocked users
+            .where((doc) => !blockedUserIds.contains(doc.id))
+            //get the user data
+            .map((doc) => _firestore.collection('users').doc(doc.id).get()));
+
+        //return the user data as a list of maps
+        return userDocs
+            //convert the user data to a map
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+      });
+    } catch (e) {
+      print('Error getting users: $e');
+      rethrow;
+    }
+  }
+
+  Stream<List<DocumentSnapshot>> getUserContactsExcludingBlocked() {
+  return _firestore
+      //get the user's contacts
+      .collection('users')
+      .doc(_auth.currentUser!.uid)
+      .collection('contacts')
+      .orderBy('name')
+      .snapshots()
+      //filter out the blocked users
+      .asyncMap((contactsSnapshot) async {
+      //get the ids of the blocked users
+    final blockedUserIds = await _firestore
+        .collection('users')
+        .doc(_auth.currentUser!.uid)
+        .collection('blockedContacts')
+        .get()
+        //get the ids of the blocked users
+        .then((blockedSnapshot) => blockedSnapshot.docs.map((doc) => doc.id).toSet());
+      //filter out the blocked users
+    final filteredContacts = contactsSnapshot.docs
+        .where((contactDoc) => !blockedUserIds.contains(contactDoc.id))
+        .toList();
+      //return the filtered contacts
+    return filteredContacts;
+  });
+}
+
+  //GET USERS EXCEPT BLOCKED USERS
+  Stream<QuerySnapshot> getUserContacts() {
+    try {
+      return _firestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .collection('contacts')
+          .orderBy('name')
+          .snapshots();
+
+      // 
+    } catch (e) {
+      print('Error getting users: $e');
+      rethrow;
+    }
+  }
+
   //GET MESSAGE
   Stream<QuerySnapshot> getMsg(String userId, String otherUserId) {
     try {
@@ -138,7 +373,7 @@ class ChatService extends ChangeNotifier {
           .collection('chat_rooms')
           .doc(chatRoomId)
           .collection('messages')
-          .orderBy('timestamp', descending: false) 
+          .orderBy('timestamp', descending: false)
           .snapshots();
     } catch (e) {
       print('Error getting messages: $e');
@@ -146,6 +381,111 @@ class ChatService extends ChangeNotifier {
     }
   }
 
+  //react to a message (add and update)
+  Future<void> reactToMsg(String otherUserId, String msgId, String reactionId,
+      String emojiMsg) async {
+    try {
+      final String currentUserId = _auth.currentUser!.uid;
+
+      //construct chat room id from user ids (sorted to ensure it matches the id used when sending messages)
+      List<String> ids = [currentUserId, otherUserId];
+      ids.sort();
+      String chatRoomId = ids.join("_");
+
+      //get the message from the database
+      DocumentSnapshot doc = await _firestore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .doc(msgId)
+          .get();
+
+      //get the reactions field from the document
+      Map<String, dynamic>? reactions =
+          (doc.data() as Map<String, dynamic>)['reactions'];
+
+      //if the reactions field is null, create a new map
+      if (reactions == null) {
+        reactions = {};
+      }
+
+      //if the user has already reacted to the message, update the reaction
+      if (reactions.containsKey(currentUserId)) {
+        reactions[currentUserId] = {
+          'reactionId': reactionId,
+          'emojiMsg': emojiMsg,
+        };
+
+        //update the reactions field in the database
+        await _firestore
+            .collection('chat_rooms')
+            .doc(chatRoomId)
+            .collection('messages')
+            .doc(msgId)
+            .update({'reactions': reactions});
+      } else {
+        //if the user has not reacted to the message, add a new reaction
+        reactions[currentUserId] = {
+          'reactionId': reactionId,
+          'emojiMsg': emojiMsg,
+        };
+
+        //update the reactions field in the database
+        await _firestore
+            .collection('chat_rooms')
+            .doc(chatRoomId)
+            .collection('messages')
+            .doc(msgId)
+            .update({'reactions': reactions});
+      }
+    } catch (e) {
+      print('Error reacting to message: $e');
+    }
+  }
+
+  //remove reaction from a message
+  Future<void> removeReaction(String otherUserId, String msgId) async {
+    try {
+      final String currentUserId = _auth.currentUser!.uid;
+
+      //construct chat room id from user ids (sorted to ensure it matches the id used when sending messages)
+      List<String> ids = [currentUserId, otherUserId];
+      ids.sort();
+      String chatRoomId = ids.join("_");
+
+      //get the message from the database
+      DocumentSnapshot doc = await _firestore
+          .collection('chat_rooms')
+          .doc(chatRoomId)
+          .collection('messages')
+          .doc(msgId)
+          .get();
+
+      //get the reactions field from the document
+      Map<String, dynamic>? reactions =
+          (doc.data() as Map<String, dynamic>)['reactions'];
+
+      //if the reactions field is null, return
+      if (reactions == null) {
+        return;
+      }
+
+      //if the user has reacted to the message, remove the reaction
+      if (reactions.containsKey(currentUserId)) {
+        reactions.remove(currentUserId);
+
+        //update the reactions field in the database
+        await _firestore
+            .collection('chat_rooms')
+            .doc(chatRoomId)
+            .collection('messages')
+            .doc(msgId)
+            .update({'reactions': reactions});
+      }
+    } catch (e) {
+      print('Error removing reaction: $e');
+    }
+  }
 
   //GET LAST MESSAGE
   Stream<QuerySnapshot> getLastMsg(String userId, String otherUserId) {
@@ -160,7 +500,8 @@ class ChatService extends ChangeNotifier {
           .collection('chat_rooms')
           .doc(chatRoomId)
           .collection('messages')
-          .orderBy('timestamp', descending: true) //sort messages by timestamp in descending order
+          .orderBy('timestamp',
+              descending: true) //sort messages by timestamp in descending order
           .limit(1) //get only the last message
           .snapshots();
     } catch (e) {
@@ -189,19 +530,6 @@ class ChatService extends ChangeNotifier {
       rethrow;
     }
     return '';
-  }
-
-  //DELETE IMAGE
-  Future<void> deleteImage(String imageUrl) async {
-    try {
-      //get the image ref from the url
-      Reference ref = _storage.refFromURL(imageUrl);
-
-      //delete the image
-      await ref.delete();
-    } catch (e) {
-      print('Error deleting image: $e');
-    }
   }
 
   //DELETE MESSAGE

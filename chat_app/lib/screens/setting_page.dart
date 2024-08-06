@@ -1,6 +1,7 @@
 // import 'package:chat_app/pages/notification_provider.dart';
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/delete_profile_page.dart';
+import 'package:chat_app/screens/blocked_contacts_page.dart';
+import 'package:chat_app/screens/delete_profile_page.dart';
 import 'package:chat_app/services/auth/auth_gate.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:chat_app/theme/theme_provider.dart';
@@ -125,6 +126,35 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 20),
+            //blocked users
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(lanNotifier.translate('blockedContacts')),
+
+                  //button to go to blocked contact page
+                  IconButton(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlockedContacts())),
+                      icon: Icon(
+                        Icons.block_rounded,
+                        color: Theme.of(context).colorScheme.onBackground,
+                    )
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
@@ -154,57 +184,77 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DeleteProfile()));
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(18),
-                child: Text(lanNotifier.translate('deleteProfile')),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(lanNotifier.translate('deleteProfile')),
+
+                  //button to go to blocked contact page
+                  IconButton(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DeleteProfile())),
+                      icon: Icon(
+                        Icons.delete_rounded,
+                        color: Theme.of(context).colorScheme.onBackground,
+                    )
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context, 
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text(lanNotifier.translate('loggingOut')),
-                      content: Text(lanNotifier.translate('logoutMsg')),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          }, 
-                          child: Text(lanNotifier.translate('cancel')),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            signOut(context);
-                            Navigator.of(context).pop();
-                          }, 
-                          child: Text(lanNotifier.translate('logout')),
-                        ),
-                      ],
-                    );
-                  }
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(18),
-                child: Text(lanNotifier.translate('logout')),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(lanNotifier.translate('logout')),
+
+                  //button to go to blocked contact page
+                  IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context, 
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(lanNotifier.translate('loggingOut')),
+                              content: Text(lanNotifier.translate('logoutMsg')),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  }, 
+                                  child: Text(lanNotifier.translate('cancel')),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    signOut(context);
+                                    Navigator.of(context).pop();
+                                  }, 
+                                  child: Text(lanNotifier.translate('logout')),
+                                ),
+                              ],
+                            );
+                          }
+                        );
+                      },
+                      icon: Icon(
+                        Icons.logout_rounded,
+                        color: Theme.of(context).colorScheme.onBackground,
+                    )
+                  ),
+                ],
               ),
             ),
           ],

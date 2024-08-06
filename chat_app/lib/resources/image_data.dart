@@ -36,14 +36,4 @@ class StoreData {
     }
     return '';
   }
-
-  //delete image from storage
-  // Future<void> deleteImage(String path) async {
-  //   try {
-  //     await storage.ref().child(path).delete();
-  //   } catch (e, s) {
-  //     print('Error deleting image: $e');
-  //     print('Stacktrace: $s');
-  //   }
-  // }
 }

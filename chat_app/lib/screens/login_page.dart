@@ -5,7 +5,7 @@ import 'package:chat_app/components/my_textfield.dart';
 import 'package:chat_app/components/square_tile.dart';
 import 'package:chat_app/language/locale_notifier.dart';
 import 'package:chat_app/navigations/user_screens.dart';
-import 'package:chat_app/pages/reset_password.dart';
+import 'package:chat_app/screens/reset_password.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -10,6 +10,7 @@ class Message {
   final Timestamp msgSentTime;
   bool isRead;
   bool isDelivered;
+  Map<String, String>? reactions;
 
   Message({
     required this.senderId,
@@ -21,22 +22,41 @@ class Message {
     required this.msgSentTime,
     this.isRead = false,
     this.isDelivered = false,
+    this.reactions,
   });
 
   //convert to a map
   Map<String, dynamic> toMap() {
+    String typeStr = 'text';
+    switch (type) {
+      case MessageType.text:
+        typeStr = 'text';
+        break;
+      case MessageType.image:
+        typeStr = 'image';
+        break;
+      case MessageType.document:
+        typeStr = 'document';
+        break;
+      case MessageType.audio:
+        typeStr = 'audio';
+        break;
+    }
+
     return {
       'senderId': senderId,
       'senderEmail': senderEmail,
       'receiverId': receiverId,
       'message': message,
-      'type': type == MessageType.image ? 'image' : 'text',
+      'type': typeStr,
       'timestamp': timestamp,
       'msgSentTime': msgSentTime,
       'isRead': isRead,
       'isDelivered': isDelivered,
+      'reactions': reactions,
     };
   }
+
 }
 
-enum MessageType { text, image }
+enum MessageType { text, image, document, audio}

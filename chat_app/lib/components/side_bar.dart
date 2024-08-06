@@ -1,6 +1,6 @@
 import 'package:chat_app/language/locale_notifier.dart';
-import 'package:chat_app/pages/profile_page.dart';
-import 'package:chat_app/pages/setting_page.dart';
+import 'package:chat_app/screens/profile_page.dart';
+import 'package:chat_app/screens/setting_page.dart';
 import 'package:chat_app/services/auth/auth_services.dart';
 import 'package:chat_app/services/auth/login_or_register.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
